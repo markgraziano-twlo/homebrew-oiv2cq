@@ -5,16 +5,18 @@ class Oiv2cq < Formula
   sha256 "389342d3351b621c2e529c9449c0f354f63734a8fd2fb57d05e10a676bf33619"
   license "MIT"
 
-  depends_on "python@3.9"
+  depends_on "python"  # Use the latest Python version
 
   def install
-    # Install the oiv2cq package into libexec
     libexec.install "oiv2cq", "requirements.txt", "setup.py"
 
-    # Create a wrapper script to invoke cli.py
+    # Dynamically resolve Python path
+    python_path = "#{Formula["python"].opt_bin}/python3"
+
+    # Create a wrapper script for the CLI
     (bin/"oiv2cq").write <<~EOS
       #!/bin/bash
-      #{Formula["python@3.9"].opt_bin}/python3 #{libexec}/oiv2cq/cli.py "$@"
+      #{python_path} #{libexec}/oiv2cq/cli.py "$@"
     EOS
     chmod "+x", bin/"oiv2cq"
   end
