@@ -1,8 +1,8 @@
 class Oiv2cq < Formula
   desc "CLI to automate onboarding and plugin setup for Twilio's CloudQuery projects"
   homepage "https://github.com/markgraziano-twlo/homebrew-oiv2cq"
-  url "https://github.com/markgraziano-twlo/homebrew-oiv2cq/releases/download/v1.0.1/oiv2cq-v1.0.1.tar.gz"
-  sha256 "e67710c4aedecf8e2b64278c1db4b0c1c7f9af6757e93116bf7d2af3d20b0eea"
+  url "https://github.com/markgraziano-twlo/homebrew-oiv2cq/releases/download/v1.0.2/oiv2cq-v1.0.2.tar.gz"
+  sha256 "9350c8cc242e67fc58c539e0e8b7a29bf10835333d25382e59d5fbe086cfb32e "
   license "MIT"
 
   depends_on "python"  # Use the latest Python version
