@@ -11,10 +11,13 @@ class Oiv2cq < Formula
     # Install all Python files
     libexec.install Dir["*"]
 
-    # Create an executable script for the CLI
+    # Dynamically find the Python binary
+    python_path = `which python3.9`.strip
+
+    # Create a wrapper script that uses the dynamically located Python
     (bin/"oiv2cq").write <<~EOS
       #!/bin/bash
-      #{Formula["python@3.9"].opt_bin}/python3 #{libexec}/cli.py "$@"
+      #{python_path} #{libexec}/cli.py "$@"
     EOS
     chmod "+x", bin/"oiv2cq"
   end
