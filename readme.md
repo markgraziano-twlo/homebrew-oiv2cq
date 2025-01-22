@@ -16,7 +16,7 @@ The OIV2CQ CLI tool streamlines the onboarding and development process for Twili
 ### Using Homebrew
 1. Install the OIV2CQ CLI:
    ```bash
-   brew install oiv2cq
+   brew tap markgraziano-twlo/oiv2cq && brew install oiv2cq
    ```
 
 2. Verify installation:
