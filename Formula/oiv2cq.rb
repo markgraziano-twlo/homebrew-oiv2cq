@@ -2,7 +2,7 @@ class Oiv2cq < Formula
   desc "CLI to automate onboarding and plugin setup for Twilio's CloudQuery projects"
   homepage "https://github.com/markgraziano-twlo/homebrew-oiv2cq"
   url "https://github.com/markgraziano-twlo/homebrew-oiv2cq/releases/download/v1.0.0/oiv2cq-v1.0.0.tar.gz"
-  sha256 "50274dc1dc2571b4f3a13be6c581b92732f90ea533a135e4a94dc08ade12e7f8" # Ensure the existing tarball's checksum is used
+  sha256 "19dbba785f7b1b0dae76513295702f5dfc1e22027a1e1394317ddbddd89162b9" # Ensure the existing tarball's checksum is used
   license "MIT"
 
   depends_on "python"
