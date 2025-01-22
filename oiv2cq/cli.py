@@ -1,6 +1,6 @@
 import argparse
-from .prereqs import main as prereqs_main
-from .template_create import main as template_create_main
+from prereqs import main as prereqs_main
+from template_create import main as template_create_main
 
 def main():
     parser = argparse.ArgumentParser(description="oiv2cq CLI")

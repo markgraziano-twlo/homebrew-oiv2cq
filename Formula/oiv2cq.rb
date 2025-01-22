@@ -15,8 +15,9 @@ class Oiv2cq < Formula
 
     # Create a wrapper script for the CLI
     (bin/"oiv2cq").write <<~EOS
-      #!/bin/bash
-      #{python_path} #{libexec}/oiv2cq/cli.py "$@"
+        #!/bin/bash
+        export PYTHONPATH=#{libexec}
+        #{Formula["python"].opt_bin}/python3 #{libexec}/oiv2cq/cli.py "$@"
     EOS
     chmod "+x", bin/"oiv2cq"
   end
