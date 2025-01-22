@@ -8,7 +8,15 @@ class Oiv2cq < Formula
   depends_on "python@3.9"
 
   def install
-    bin.install "oiv2cq"
+    # Install all Python files
+    libexec.install Dir["*"]
+
+    # Create an executable script for the CLI
+    (bin/"oiv2cq").write <<~EOS
+      #!/bin/bash
+      #{Formula["python@3.9"].opt_bin}/python3 #{libexec}/cli.py "$@"
+    EOS
+    chmod "+x", bin/"oiv2cq"
   end
 
   test do
