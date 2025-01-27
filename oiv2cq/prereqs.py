@@ -24,6 +24,15 @@ def install_homebrew():
             '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
             "Installing Homebrew"
         )
+def upgrade_pip():
+    """Upgrades pip to the latest version."""
+    print(colored("Upgrading pip to the latest version...", "yellow"))
+    try:
+        subprocess.run("pip install --upgrade pip", shell=True, check=True)
+        print(colored("✔ Pip upgraded successfully.\n", "green"))
+    except subprocess.CalledProcessError as e:
+        print(colored(f"✖ Failed to upgrade pip: {e}", "red"))
+        exit(1)  # Exit if pip upgrade fails, as it might cause downstream issues
 
 def setup_ssh_key():
     """Sets up an SSH key for GitHub and handles user authorization."""
@@ -79,6 +88,9 @@ def main():
 
     # Install or Upgrade Python
     run_command("brew install python || brew upgrade python", "Installing or upgrading Python")
+
+    # Install or Upgrade pip
+    upgrade_pip()
 
     # Install or Upgrade GitHub CLI
     run_command("brew install gh || brew upgrade gh", "Installing or upgrading GitHub CLI")
