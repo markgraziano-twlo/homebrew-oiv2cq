@@ -24,15 +24,6 @@ def install_homebrew():
             '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
             "Installing Homebrew"
         )
-def upgrade_pip():
-    """Upgrades pip to the latest version."""
-    print(colored("Upgrading pip to the latest version...", "yellow"))
-    try:
-        subprocess.run("pip install --upgrade pip", shell=True, check=True)
-        print(colored("✔ Pip upgraded successfully.\n", "green"))
-    except subprocess.CalledProcessError as e:
-        print(colored(f"✖ Failed to upgrade pip: {e}", "red"))
-        exit(1)  # Exit if pip upgrade fails, as it might cause downstream issues
 
 def setup_ssh_key():
     """Sets up an SSH key for GitHub and handles user authorization."""
@@ -80,6 +71,24 @@ def setup_ssh_key():
     else:
         print(colored(f"\u2718 SSH connection failed: {result.stderr.strip()}", "red"))
 
+def check_docker():
+    """Checks if Docker is installed, or prompts the user to install Docker Desktop."""
+    print(colored("Checking for Docker installation...", "yellow"))
+    try:
+        subprocess.run("docker --version", shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(colored("\u2714 Docker is already installed.\n", "green"))
+    except subprocess.CalledProcessError:
+        print(colored("Docker is not installed. Opening Docker Desktop download page...", "yellow"))
+        run_command("open https://www.docker.com/products/docker-desktop/", "Opening Docker Desktop download page")
+        print(colored("\u26A0 Please download and install Docker Desktop. Once installed, press Enter to continue.", "yellow"))
+        input("Press Enter once Docker Desktop is installed...")
+        try:
+            subprocess.run("docker --version", shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(colored("\u2714 Docker installation confirmed.\n", "green"))
+        except subprocess.CalledProcessError:
+            print(colored("\u2718 Docker installation could not be confirmed. Please ensure Docker Desktop is installed and running.", "red"))
+            exit(1)
+
 def main():
     print(colored("Starting developer onboarding process...", "yellow"))
 
@@ -88,9 +97,6 @@ def main():
 
     # Install or Upgrade Python
     run_command("brew install python || brew upgrade python", "Installing or upgrading Python")
-
-    # Install or Upgrade pip
-    upgrade_pip()
 
     # Install or Upgrade GitHub CLI
     run_command("brew install gh || brew upgrade gh", "Installing or upgrading GitHub CLI")
@@ -105,6 +111,9 @@ def main():
 
     # Install Python SDK
     run_command("pip install --upgrade cloudquery-plugin-sdk", "Installing or upgrading CloudQuery Python SDK")
+
+    # Check Docker Installation
+    check_docker()
 
     # SSH Key Setup
     setup_ssh_key()
