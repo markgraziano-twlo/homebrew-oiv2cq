@@ -3,7 +3,8 @@ import os
 from termcolor import colored
 import subprocess
 
-VENV_PATH = "/usr/local/Cellar/oiv2cq/venv"
+# Move VENV_PATH to a user-writable directory
+VENV_PATH = os.path.expanduser("~/.oiv2cq/venv")
 
 def create_virtualenv_if_missing():
     """Creates the virtual environment if it doesn't already exist."""

@@ -6,9 +6,16 @@ import shutil
 from pathlib import Path
 from termcolor import colored
 
-# Wrapper to run shell commands
+# Virtual environment path
+VENV_PATH = os.path.expanduser("~/.oiv2cq/venv")
+
+def activate_virtualenv():
+    """Activates the virtual environment by setting environment variables."""
+    os.environ["VIRTUAL_ENV"] = VENV_PATH
+    os.environ["PATH"] = f"{VENV_PATH}/bin:" + os.environ["PATH"]
 
 def run_command(command, description, capture_output=False):
+    """Runs shell commands within the virtual environment."""
     print(colored(f"Starting: {description}", "yellow"))
     result = subprocess.run(command, shell=True, text=True, capture_output=capture_output)
     if result.returncode != 0:
@@ -17,8 +24,8 @@ def run_command(command, description, capture_output=False):
     print(colored(f"✔ {description} completed successfully.\n", "green"))
     return result.stdout.strip() if capture_output else None
 
-# Function to prompt for a valid directory
 def prompt_for_directory(prompt_message):
+    """Prompts user for a valid directory."""
     while True:
         directory = input(colored(prompt_message, "yellow")).strip()
         directory = os.path.abspath(os.path.expanduser(directory))
@@ -26,8 +33,10 @@ def prompt_for_directory(prompt_message):
             return directory
         print(colored(f"Invalid directory: {directory}. Please ensure the path exists.", "red"))
 
-# Main template creation logic
 def main():
+    # Activate virtual environment at the start
+    activate_virtualenv()
+
     # Step 1: Prompt for project folder
     print(colored("Please navigate to your preferred projects folder.", "yellow"))
     project_folder = prompt_for_directory("Enter the full path to your projects folder: ")
@@ -98,8 +107,8 @@ def main():
         json.dump(cookiecutter_json, f, indent=4)
     print(colored(f"Generated cookiecutter.json at {plugins_dir}", "green"))
 
-    # Step 6: Run cookiecutter refactoring
-    run_command(f"cookiecutter {plugins_dir} --no-input", "Running cookiecutter refactoring")
+    # Step 6: Run cookiecutter refactoring using the virtual environment's version
+    run_command(f"{VENV_PATH}/bin/cookiecutter {plugins_dir} --no-input", "Running cookiecutter refactoring")
 
     plugin_path = plugins_dir / plugin_name
     if not plugin_path.is_dir():
