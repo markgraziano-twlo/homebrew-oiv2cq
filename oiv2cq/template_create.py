@@ -6,12 +6,15 @@ import shutil
 from pathlib import Path
 from termcolor import colored
 
-# Function to run shell commands
-def run_command(command, capture_output=False):
+# Wrapper to run shell commands
+
+def run_command(command, description, capture_output=False):
+    print(colored(f"Starting: {description}", "yellow"))
     result = subprocess.run(command, shell=True, text=True, capture_output=capture_output)
     if result.returncode != 0:
         print(colored(f"Error executing command: {command}\n{result.stderr}", "red"))
         sys.exit(1)
+    print(colored(f"✔ {description} completed successfully.\n", "green"))
     return result.stdout.strip() if capture_output else None
 
 # Function to prompt for a valid directory
@@ -23,17 +26,17 @@ def prompt_for_directory(prompt_message):
             return directory
         print(colored(f"Invalid directory: {directory}. Please ensure the path exists.", "red"))
 
+# Main template creation logic
 def main():
     # Step 1: Prompt for project folder
     print(colored("Please navigate to your preferred projects folder.", "yellow"))
-    print(colored("Note: The folder must already exist.", "red"))
     project_folder = prompt_for_directory("Enter the full path to your projects folder: ")
     project_folder = Path(project_folder)
 
     # Step 2: Clone the repository
     repo_url = "git@github.com:twilio-internal/cloudquery-plugins.git"
     print(colored(f"Cloning repository: {repo_url}", "cyan"))
-    run_command(f"git clone {repo_url} {project_folder / 'cloudquery-plugins'}")
+    run_command(f"git clone {repo_url} {project_folder / 'cloudquery-plugins'}", "Cloning CloudQuery plugins repository")
 
     # Step 2.1: Create a feature branch
     repo_path = project_folder / "cloudquery-plugins"
@@ -44,9 +47,7 @@ def main():
         print(colored("Plugin name is required.", "red"))
         sys.exit(1)
     branch_name = f"feature/{plugin_name}-init"
-    print(colored(f"Creating feature branch: {branch_name}", "cyan"))
-    run_command(f"git checkout -b {branch_name}")
-    print(colored(f"Created and switched to branch: {branch_name}", "green"))
+    run_command(f"git checkout -b {branch_name}", f"Creating and switching to feature branch: {branch_name}")
 
     # Step 3: Verify and navigate into the plugins folder
     plugins_dir = repo_path / "plugins"
@@ -60,17 +61,12 @@ def main():
     cookiecutter_folder = "{{cookiecutter.plugin_name}}"
 
     print(colored(f"Fetching {cookiecutter_folder} from {cookiecutter_repo_url}...", "cyan"))
-
-    # Clone the repo sparsely with only the required folder
-    run_command(f"git clone --depth 1 --filter=blob:none --sparse {cookiecutter_repo_url} {temp_repo_dir}")
+    run_command(f"git clone --depth 1 --filter=blob:none --sparse {cookiecutter_repo_url} {temp_repo_dir}", "Sparse cloning cookiecutter template")
     os.chdir(temp_repo_dir)
-    run_command(f"git sparse-checkout set {cookiecutter_folder}")
+    run_command(f"git sparse-checkout set {cookiecutter_folder}", "Setting sparse-checkout for template")
 
     # Copy the cookiecutter template folder to the plugins directory
-    shutil.copytree(
-        temp_repo_dir / cookiecutter_folder,
-        plugins_dir / cookiecutter_folder  # Keep the placeholder format
-    )
+    shutil.copytree(temp_repo_dir / cookiecutter_folder, plugins_dir / cookiecutter_folder)
     print(colored(f"Copied {cookiecutter_folder} to {plugins_dir / cookiecutter_folder}", "green"))
 
     # Cleanup the temporary repository directory
@@ -103,25 +99,17 @@ def main():
     print(colored(f"Generated cookiecutter.json at {plugins_dir}", "green"))
 
     # Step 6: Run cookiecutter refactoring
-    try:
-        print(colored("Running cookiecutter refactoring...", "cyan"))
-        os.chdir(plugins_dir)  # Ensure the working directory is correct
-        run_command(f"pipx run cookiecutter {plugins_dir} --no-input")
-        print(colored("Performed cookiecutter refactoring.", "green"))
+    run_command(f"cookiecutter {plugins_dir} --no-input", "Running cookiecutter refactoring")
 
-        plugin_path = plugins_dir / plugin_name
-        if not plugin_path.is_dir():
-            print(colored(f"Error: Plugin directory '{plugin_path}' not found after refactoring.", "red"))
-            sys.exit(1)
-        print(colored(f"Plugin directory after refactoring: {plugin_path}", "green"))
-
-        # Delete cookiecutter.json after successful refactoring
-        os.remove(plugins_dir / "cookiecutter.json")
-        print(colored("Deleted cookiecutter.json after refactoring.", "green"))
-
-    except Exception as e:
-        print(colored(f"Error during cookiecutter refactoring: {e}", "red"))
+    plugin_path = plugins_dir / plugin_name
+    if not plugin_path.is_dir():
+        print(colored(f"Error: Plugin directory '{plugin_path}' not found after refactoring.", "red"))
         sys.exit(1)
+    print(colored(f"Plugin directory after refactoring: {plugin_path}", "green"))
+
+    # Delete cookiecutter.json after successful refactoring
+    os.remove(plugins_dir / "cookiecutter.json")
+    print(colored("Deleted cookiecutter.json after refactoring.", "green"))
 
     # Step 7: OpenAPI cleanup
     openapi_support = input(colored("Does the source support OpenAPI (y/n)? ", "yellow")).strip().lower()
@@ -136,7 +124,7 @@ def main():
         print(colored("Deleted OpenAPI-related files and folders.", "green"))
 
     # Step 8: Completion message
-    print(colored("\u2714 All steps completed successfully! Your environment is ready for use. You can now continue working in this terminal.", "green"))
+    print(colored("\u2714 All steps completed successfully! Your environment is ready for use.", "green"))
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,6 @@ setup(
     install_requires=[
         "termcolor",
         "cookiecutter",
-        "pipx",
     ],
     entry_points={
         "console_scripts": [
