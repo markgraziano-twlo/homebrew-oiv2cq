@@ -1,5 +1,6 @@
 import argparse
 import os
+from termcolor import colored
 import subprocess
 from prereqs import main as prereqs_main
 from template_create import main as template_create_main
@@ -19,31 +20,40 @@ def run_command_with_venv(command):
     full_command = f"source {VENV_PATH}/bin/activate && {command}"
     subprocess.run(full_command, shell=True, check=True)
 
+def display_help():
+    help_text = f"""
+{colored('OIV2CQ CLI', 'cyan', attrs=['bold'])}
+{colored('Usage:', 'yellow', attrs=['bold'])}
+  {colored('oiv2cq setup', 'green')}       - Run the prerequisite setup
+  {colored('oiv2cq template', 'green')}    - Generate a local CloudQuery plugin template
+  {colored('oiv2cq --help', 'green')}      - Show this help message
+
+{colored('Available Commands:', 'yellow', attrs=['bold'])}
+  {colored('setup', 'green')}       Set up development dependencies
+  {colored('template', 'green')}    Clone and generate a CloudQuery plugin template
+"""
+    print(help_text)
+
 def main():
-    activate_virtualenv()  # Activate the virtual environment before parsing arguments
-
-    parser = argparse.ArgumentParser(description="oiv2cq CLI: Automate onboarding and plugin setup")
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
-
-    # Prereqs command
-    prereqs_parser = subparsers.add_parser("setup", help="Run prerequisite setup")
-    prereqs_parser.set_defaults(func=prereqs_main)
-
-    # Template command
-    template_parser = subparsers.add_parser(
-        "template",
-        help="Clone the cloudquery-plugins repo and generate a local CloudQuery plugin template for development.",
+    parser = argparse.ArgumentParser(
+        description="oiv2cq CLI: Automate onboarding and plugin setup",
+        add_help=False,
     )
-    template_parser.set_defaults(func=template_create_main)
+    parser.add_argument("command", help="Available commands: setup, template")
+    parser.add_argument("--help", action="store_true", help="Show help message")
 
-    # Parse arguments
     args = parser.parse_args()
 
-    # Execute subcommand or show help
-    if args.command:
-        args.func()
+    if args.help:
+        display_help()
+    elif args.command == "setup":
+        from prereqs import main as prereqs_main
+        prereqs_main()
+    elif args.command == "template":
+        from template_create import main as template_create_main
+        template_create_main()
     else:
-        parser.print_help()
+        print(colored("Unknown command. Run 'oiv2cq --help' for available commands.", "red"))
 
 if __name__ == "__main__":
     main()
