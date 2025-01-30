@@ -2,15 +2,13 @@ import argparse
 import os
 from termcolor import colored
 import subprocess
-from prereqs import main as prereqs_main
-from template_create import main as template_create_main
 
 VENV_PATH = "/usr/local/Cellar/oiv2cq/venv"
 
 # Ensure the virtual environment is active before running any subcommands
 def activate_virtualenv():
     if not os.path.exists(f"{VENV_PATH}/bin/activate"):
-        print("Virtual environment not found. Please run 'oiv2cq setup' first.")
+        print(colored("Virtual environment not found. Please run 'oiv2cq setup' first.", "red"))
         exit(1)
     os.environ["VIRTUAL_ENV"] = VENV_PATH
     os.environ["PATH"] = f"{VENV_PATH}/bin:" + os.environ["PATH"]
@@ -35,25 +33,31 @@ def display_help():
     print(help_text)
 
 def main():
+    activate_virtualenv()  # Activate the virtual environment before parsing arguments
+
     parser = argparse.ArgumentParser(
         description="oiv2cq CLI: Automate onboarding and plugin setup",
-        add_help=False,
+        add_help=False,  # Custom help instead of default argparse behavior
     )
-    parser.add_argument("command", help="Available commands: setup, template")
+    parser.add_argument("command", nargs="?", help="Available commands: setup, template")
     parser.add_argument("--help", action="store_true", help="Show help message")
 
     args = parser.parse_args()
 
-    if args.help:
+    # Display help when no command or --help is provided
+    if not args.command or args.help:
         display_help()
-    elif args.command == "setup":
+        return
+
+    # Handle commands
+    if args.command == "setup":
         from prereqs import main as prereqs_main
         prereqs_main()
     elif args.command == "template":
         from template_create import main as template_create_main
         template_create_main()
     else:
-        print(colored("Unknown command. Run 'oiv2cq --help' for available commands.", "red"))
+        print(colored(f"Unknown command: {args.command}. Run 'oiv2cq --help' for available commands.", "red"))
 
 if __name__ == "__main__":
     main()
