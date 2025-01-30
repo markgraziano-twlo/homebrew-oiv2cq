@@ -5,16 +5,20 @@ import subprocess
 
 VENV_PATH = "/usr/local/Cellar/oiv2cq/venv"
 
-# Ensure the virtual environment is active before running any subcommands
+def create_virtualenv_if_missing():
+    """Creates the virtual environment if it doesn't already exist."""
+    if not os.path.exists(VENV_PATH):
+        print(colored("Virtual environment not found. Creating it now...", "yellow"))
+        subprocess.run(f"python3 -m venv {VENV_PATH}", shell=True, check=True)
+        print(colored(f"✔ Virtual environment created at {VENV_PATH}\n", "green"))
+
 def activate_virtualenv():
-    if not os.path.exists(f"{VENV_PATH}/bin/activate"):
-        print(colored("Virtual environment not found. Please run 'oiv2cq setup' first.", "red"))
-        exit(1)
+    """Activates the virtual environment by setting environment variables."""
     os.environ["VIRTUAL_ENV"] = VENV_PATH
     os.environ["PATH"] = f"{VENV_PATH}/bin:" + os.environ["PATH"]
 
-# Wrapper to execute commands within the virtual environment
 def run_command_with_venv(command):
+    """Runs a command within the virtual environment."""
     full_command = f"source {VENV_PATH}/bin/activate && {command}"
     subprocess.run(full_command, shell=True, check=True)
 
@@ -33,8 +37,6 @@ def display_help():
     print(help_text)
 
 def main():
-    activate_virtualenv()  # Activate the virtual environment before parsing arguments
-
     parser = argparse.ArgumentParser(
         description="oiv2cq CLI: Automate onboarding and plugin setup",
         add_help=False,  # Custom help instead of default argparse behavior
@@ -44,18 +46,29 @@ def main():
 
     args = parser.parse_args()
 
-    # Display help when no command or --help is provided
+    # Handle help or display it by default if no command is given
     if not args.command or args.help:
         display_help()
         return
 
+    # Only check or create the virtual environment for commands other than setup
+    if args.command != "setup":
+        create_virtualenv_if_missing()
+        activate_virtualenv()
+
     # Handle commands
     if args.command == "setup":
+        # Create the virtual environment as part of setup
+        create_virtualenv_if_missing()
+        activate_virtualenv()
+
         from prereqs import main as prereqs_main
         prereqs_main()
+
     elif args.command == "template":
         from template_create import main as template_create_main
         template_create_main()
+
     else:
         print(colored(f"Unknown command: {args.command}. Run 'oiv2cq --help' for available commands.", "red"))
 
